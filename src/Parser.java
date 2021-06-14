@@ -2,7 +2,9 @@ import java.util.Locale;
 import java.util.Scanner;
 
 public class Parser {
-    public static int convertAssemblyToBinary(String instruction) {
+
+
+    public int convertAssemblyToBinary(String instruction) {
         instruction = instruction.toUpperCase();
         String term[] = instruction.trim().split("\\s+");
         String binaryInstruction = "";
@@ -102,7 +104,7 @@ public class Parser {
 
 
     // This method returns 0 for RType instructions, 1 for IType, 2 for JType, -1 for invalid input
-    private static int typeOfInstruction(String instruction) {
+    private  int typeOfInstruction(String instruction) {
         switch (instruction) {
             case "ADD":
             case "SUB":
@@ -123,7 +125,7 @@ public class Parser {
         return -1;
     }
 
-    public static String firstNBits(int num, int n) {
+    private String firstNBits(int num, int n) {
         StringBuilder sb = new StringBuilder();
         while (n-- > 0) {
             sb.append(num & 1);
@@ -140,12 +142,12 @@ public class Parser {
 
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        while(true){
-            String s = sc.nextLine();
-            
-            System.out.println(toBinaryString(convertAssemblyToBinary(s)));
-        }
-    }
+//    public static void main(String[] args) {
+//        Scanner sc = new Scanner(System.in);
+//        while(true){
+//            String s = sc.nextLine();
+//
+//            System.out.println(toBinaryString(convertAssemblyToBinary(s)));
+//        }
+//    }
 }
