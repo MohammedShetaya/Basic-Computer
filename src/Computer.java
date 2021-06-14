@@ -22,7 +22,7 @@ public class Computer {
         parser = new Parser() ;
         memory = new int[memSize];
         registers = new int[32];
-        stages = new int[4];
+        stages = new Instruction[5];
          pc = 0;
         dataSize = 0;
         instructionSize = 0;
@@ -86,6 +86,7 @@ public class Computer {
             memory[curMemoryAddress++] = word;
 
         }
+
     }
 
 
