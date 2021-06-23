@@ -40,7 +40,9 @@ public class Instruction {
         shamt = Integer.parseInt(inst.substring(19, 32), 2);
 
         // Immediate
-        imm = Integer.parseInt(inst.substring(14, 32), 2);
+        // it has to be a signed value, the parseInt expects the string to
+        // have a sign '-'  before the number
+        imm = Integer.parseInt(addSign(inst.substring(14, 32)), 2);
 
         // Jtype
         address = Integer.parseInt(inst.substring(4, 32), 2);
@@ -141,6 +143,7 @@ public class Instruction {
         }
     }
 
+    // this method returns the 32 bit binary string of the integer n
     public static String numberTobinaryString(int n) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 32; i++) {
@@ -152,6 +155,12 @@ public class Instruction {
         return sb.reverse().toString();
     }
 
+    // this method adds a '-' sign if the number is negative
+    public static String addSign(String binString){
+        if(binString.charAt(0)=='1')
+            return "-" + binString;
+        return binString;
+    }
 
 
 }

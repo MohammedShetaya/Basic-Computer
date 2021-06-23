@@ -154,14 +154,4 @@ public class Parser {
         return sb.reverse().toString();
     }
 
-    // this method returns the 32 bit binary string of the integer x
-    public static String toBinaryString(int x){
-        String s= Integer.toBinaryString(x);
-        while (s.length() < 32 ) {
-            s = s.charAt(0) + s ;
-        }
-        return s;
-
-    }
-
 }

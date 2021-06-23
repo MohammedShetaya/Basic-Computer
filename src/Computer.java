@@ -79,10 +79,13 @@ public class Computer {
             case 6:
             case 8:
             case 9:
-            case 10:
                 registers[curInstruction.r1] = aluResult;
                 curInstruction.valueR1 = aluResult;
                 break;
+            case 10:
+                registers[curInstruction.r1] = curInstruction.valueR1;
+                break;
+
         }
     }
 
