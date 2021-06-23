@@ -28,6 +28,8 @@ public class Computer {
     }
 
     public void fetch() {
+        if (pc >= instructionSize)
+            return;
         int inst = memory[pc];
         stages[0] = new Instruction();
         stages[0].fetch(inst);
@@ -108,7 +110,7 @@ public class Computer {
         }
         instructionSize = curMemoryAddress;
         cycles = 1;
-        while (pc < instructionSize) {
+        while (pc < instructionSize || !allNull()) {
             if (cycles % 2 == 1) {
 
                 stages[0] = null;
@@ -119,34 +121,6 @@ public class Computer {
             } else {
                 decode();
                 memoryAccess();
-            }
-
-            // printings
-            System.out.println("cycle number: " + cycles);
-            // print changes in registers and memory
-            printStages();
-
-            // prepare stages for next cycle
-            checkJump();
-            shiftStages(cycles);
-            cycles++;
-        }
-        for (int i = 1; i < 7; i++) {
-            if (cycles % 2 == 1) {
-
-                stages[0] = null;
-                if (i<1)
-                    fetch();
-                if (i<5)
-                    excecute();
-                if (i<7)
-                    writeBack();
-
-            } else {
-                if (i<3)
-                    decode();
-                if (i<6)
-                    memoryAccess();
             }
 
             // printings
