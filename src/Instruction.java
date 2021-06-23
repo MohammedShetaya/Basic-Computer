@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 public class Instruction {
     int binInstruction;
     String stringInstruction;
@@ -40,9 +42,9 @@ public class Instruction {
         shamt = Integer.parseInt(inst.substring(19, 32), 2);
 
         // Immediate
-        // it has to be a signed value, the parseInt expects the string to
-        // have a sign '-'  before the number
-        imm = Integer.parseInt(addSign(inst.substring(14, 32)), 2);
+        // The immediate field is a "signed" value EXCEPT in MOVR and MOVM
+        // the parseInt expects the string to have a sign '-'  before the number
+        imm = parseSignedInteger(inst.substring(14, 32));
 
         // Jtype
         address = Integer.parseInt(inst.substring(4, 32), 2);
@@ -85,9 +87,9 @@ public class Instruction {
             // logical shift right: R1 = R2>>>shamt
             case 9: aluResult=  valueR2>>>shamt; break;
             // MOVR = R1= MEM[R2+IMM]
-            case 10: aluResult = valueR2 + imm; break;
+            case 10: aluResult = valueR2 + Math.abs(imm); break;
             //MOVM = MEM[R2+IMM]=R1
-            case 11: aluResult = valueR2 + imm; break;
+            case 11: aluResult = valueR2 + Math.abs(imm); break;
         }
     }
     public void memoryAccess(int[] memory) {
@@ -155,12 +157,27 @@ public class Instruction {
         return sb.reverse().toString();
     }
 
-    // this method adds a '-' sign if the number is negative
-    public static String addSign(String binString){
-        if(binString.charAt(0)=='1')
-            return "-" + binString;
-        return binString;
+    public static int parseSignedInteger(String binString){
+        // if it's positive, just parse
+        if(binString.charAt(0)=='0')
+            return Integer.parseInt(binString, 2);
+
+        // it's a negative number, flip bits and add one
+        StringBuilder sb = new StringBuilder();
+        for(int i=0;i<binString.length();i++)
+            sb.append(binString.charAt(i)=='0'?'1':'0');
+        int val = Integer.parseInt(sb.toString(), 2) + 1;
+        return -val;
     }
 
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int x =sc.nextInt();
+        String s = numberTobinaryString(x);
+//        s = s.substring(1);
+        int parsed = parseSignedInteger(s);
+        System.out.println(s);
+        System.out.println(parsed);
+    }
 
 }
