@@ -42,7 +42,7 @@ public class Computer {
         stages[1].decode(registers);
     }
 
-    public void excecute() {
+    public void execute() {
         if (stages[2] == null)
             return;
         Instruction i = stages[2];
@@ -83,11 +83,6 @@ public class Computer {
                 registers[curInstruction.r1] = aluResult;
                 curInstruction.valueR1 = aluResult;
                 break;
-//            case 4:
-//            case 7:
-//                pc = aluResult;
-//                break;
-
         }
     }
 
@@ -115,7 +110,7 @@ public class Computer {
 
                 stages[0] = null;
                 fetch();
-                excecute();
+                execute();
                 writeBack();
 
             } else {

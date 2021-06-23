@@ -15,6 +15,7 @@ public class Parser {
         }
         int opCode = 0;
         if (instType == 0) {
+            // R-type instruction
             switch (term[0]) {
                 case "ADD":
                     opCode = 0;
@@ -51,6 +52,7 @@ public class Parser {
             binaryInstruction += firstNBits(shAmt, 13);
 
         } else if (instType == 1) {
+            // I-type instruction
             switch (term[0]) {
                 case "MOVI":
                     opCode = 3;
@@ -73,6 +75,8 @@ public class Parser {
             binaryInstruction += firstNBits(regIdx, 5);
             int r2 = 0;
             int imm = 0;
+            // MOVR and MOVM format are changed to MOVR R1 R2 IMM
+            /*
             if (term[0].equals("MOVR") || term[0].equals("MOVM")) {
                 for (int i = 0; i < term[2].length(); i++) {
                     if (term[2].charAt(i) == '(') {
@@ -83,7 +87,8 @@ public class Parser {
                     }
                 }
             }
-            else if (term[0].equals("MOVI")){
+            */
+            if (term[0].equals("MOVI")){
                 imm = Integer.parseInt(term[2]) ;
             }
             else {
