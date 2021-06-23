@@ -1,0 +1,2 @@
+add R3 R1 R2
+and R4 R1 R2

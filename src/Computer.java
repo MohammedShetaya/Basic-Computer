@@ -29,6 +29,7 @@ public class Computer {
 
     public void fetch() {
         int inst = memory[pc];
+        stages[0] = new Instruction();
         stages[0].fetch(inst);
         pc++;
     }
@@ -37,7 +38,6 @@ public class Computer {
         if (stages[1] == null)
             return;
         stages[1].decode(registers);
-        pc++;
     }
 
     public void excecute() {
@@ -108,12 +108,10 @@ public class Computer {
         }
         instructionSize = curMemoryAddress;
         cycles = 1;
-        while (true) {
-            if (pc >= instructionSize && allNull())
-                break;
+        while (pc < instructionSize) {
             if (cycles % 2 == 1) {
 
-                stages[0] = new Instruction();
+                stages[0] = null;
                 fetch();
                 excecute();
                 writeBack();
@@ -131,6 +129,35 @@ public class Computer {
             // prepare stages for next cycle
             checkJump();
             shiftStages(cycles);
+            cycles++;
+        }
+        for (int i = 1; i < 7; i++) {
+            if (cycles % 2 == 1) {
+
+                stages[0] = null;
+                if (i<1)
+                    fetch();
+                if (i<5)
+                    excecute();
+                if (i<7)
+                    writeBack();
+
+            } else {
+                if (i<3)
+                    decode();
+                if (i<6)
+                    memoryAccess();
+            }
+
+            // printings
+            System.out.println("cycle number: " + cycles);
+            // print changes in registers and memory
+            printStages();
+
+            // prepare stages for next cycle
+            checkJump();
+            shiftStages(cycles);
+            cycles++;
         }
 
         printAllRegisters();
@@ -155,13 +182,12 @@ public class Computer {
     }
 
     public void printStages () {
-        System.out.println("Cycle : " + cycles);
         if (stages[0] == null)
             System.out.println("Fetching : " + "no instruction");
         else {
             System.out.println("Fetching : " + stages[0].stringInstruction);
             System.out.println("Inputs : ");
-            System.out.println("PC = " + pc);
+            System.out.println("PC = " + (pc-1));
             System.out.println("Outputs : ");
             System.out.println("BinaryInstruction = " + stages[0].binInstruction);
         }
@@ -180,9 +206,9 @@ public class Computer {
             System.out.println("shift amount = " + stages[1].shamt);
             System.out.println("immediate = " + stages[1].imm);
             System.out.println("address = " + stages[1].address);
-            System.out.println("value[R1] = " + stages[1].valueR1);
-            System.out.println("value[R2] = " + stages[1].valueR2);
-            System.out.println("value[R3] = " + stages[1].valueR3);
+            System.out.println("Registers[ " + stages[1].r1 + " ] = " + stages[1].valueR1);
+            System.out.println("Registers[ " + stages[1].r2 + " ] = " + stages[1].valueR2);
+            System.out.println("Registers[ " + stages[1].r3 + " ] = " + stages[1].valueR3);
         }
         System.out.println("\n----------------------------\n");
         if (stages[2] == null)
@@ -197,25 +223,122 @@ public class Computer {
                     // mul: R1 = R2 * R3
                 case 2:
                     System.out.println("Inputs : ");
-                    System.out.println("value[R2] = " + stages[2].valueR2);
-                    System.out.println("value[R3] = " + stages[2].valueR3);
+                    System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
+                    System.out.println("Registers[ " + stages[2].r3 + " ] = " + stages[2].valueR3);
                     System.out.println("Outputs : ");
-                    // TODO the line 202 is hashed and it is under using
-                   // System.out.println("ALU Result = " + stages[1].alu);
+                    System.out.println("ALU Result = " + stages[2].aluResult);
                     break;
                 // MOVI: R1 = IMM
                 case 3:
                     System.out.println("Inputs : ");
-                    System.out.println("value[R1] = " + stages[2].valueR1);
+                    System.out.println("Registers[ " + stages[2].r1 + " ] = " + stages[2].valueR1);
                     System.out.println("Outputs : ");
-                    System.out.println("ALU Result = " + stages[1].aluResult);
+                    System.out.println("ALU Result = " + stages[2].aluResult);
                     break;
                 // JEQ R1 R2 IMM
                 // jump to  PC+1+IMM no registers needed
                 // pc is already pointing to next instruction,add imm to it
-
+                case 4 :
+                    System.out.println("Inputs : ");
+                    System.out.println("Registers[ " + stages[2].r1 + " ] = " + stages[2].valueR1);
+                    System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
+                    System.out.println("Outputs : ");
+                    System.out.println("Jump Address = " + stages[2].aluResult);
+                    break;
+                // R1 = R2 & R3
+                case 5 :
+                    System.out.println("Inputs : ");
+                    System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
+                    System.out.println("Registers[ " + stages[2].r3 + " ] = " + stages[2].valueR3);
+                    System.out.println("Outputs : ");
+                    System.out.println("ALU Result = " + stages[2].aluResult);
+                    break;
+                // R1 = R2 ⊕ IMM
+                case 6 :
+                    System.out.println("Inputs : ");
+                    System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
+                    System.out.println("Registers[ " + stages[2].r3 + " ] = " + stages[2].valueR3);
+                    System.out.println("Outputs : ");
+                    System.out.println("ALU Result = " + stages[2].aluResult);
+                    break;
+                // jump to address no registers needed
+                case 7 :
+                    System.out.println("Inputs : ");
+                    System.out.println("No inputs needed");
+                    System.out.println("Outputs : ");
+                    System.out.println("Jump address = " + stages[2].aluResult);
+                    break;
+                // logical shift left:R1 = R2<<<shamt
+                case 8 :
+                    System.out.println("Inputs : ");
+                    System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
+                    System.out.println("shamt = " + stages[2].shamt);
+                    System.out.println("Outputs : ");
+                    System.out.println("ALU Result = " + stages[2].aluResult);
+                    break;
+                // logical shift right: R1 = R2>>>shamt
+                case 9:
+                    System.out.println("Inputs : ");
+                    System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
+                    System.out.println("shamt = " + stages[2].shamt);
+                    System.out.println("Outputs : ");
+                    System.out.println("ALU Result = " + stages[2].aluResult);
+                    break;
+                // MOVR = R1= MEM[R2+IMM]
+                case 10:
+                    System.out.println("Inputs : ");
+                    System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
+                    System.out.println("imm = " + stages[2].imm);
+                    System.out.println("Outputs : ");
+                    System.out.println("Memory Address = " + stages[2].aluResult);
+                    break;
+                //MOVM = MEM[R2+IMM]=R1
+                case 11:
+                    System.out.println("Inputs : ");
+                    System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
+                    System.out.println("imm = " + stages[2].imm);
+                    System.out.println("Outputs : ");
+                    System.out.println("Memory Address = " + stages[2].aluResult);
+                    break;
             }
         }
+        System.out.println("\n----------------------------\n");
+        if (stages[3] == null)
+            System.out.println("Memory Accessing : " + "no instruction");
+        else {
+            System.out.println("Memory Accessing : " + stages[3].stringInstruction);
+            switch (stages[3].opcode){
+                // MOVR = R1= MEM[R2+IMM]
+                case 10:
+                    System.out.println("Inputs : ");
+                    System.out.println("Memory Address = " + stages[3].aluResult);
+                    System.out.println("Outputs : ");
+                    System.out.println("Registers[ " + stages[3].r1 + " ] = " + stages[3].valueR1);
+                    break;
+                    //MOVM = MEM[R2+IMM]=R1
+                case 11:
+                    System.out.println("Inputs : ");
+                    System.out.println("Memory Address = " + stages[3].aluResult);
+                    System.out.println("Registers[ " + stages[3].r1 + " ] = " + stages[3].valueR1);
+                    System.out.println("Outputs : ");
+                    System.out.println("Memory [ " + stages[3].aluResult + " ] = " + memory[stages[3].aluResult]);
+                    break;
+                default:
+                    System.out.println("No memory accessing is needed");
+                    break;
+            }
+        }
+        System.out.println("\n----------------------------\n");
+        if (stages[4] == null)
+            System.out.println("Writing Back : " + "no instruction");
+        else {
+            System.out.println("Writing Back : " + stages[4].stringInstruction);
+            System.out.println("Inputs : ");
+            System.out.println("No inputs needed");
+            System.out.println("Outputs : ");
+            System.out.println("Registers[ " + stages[4].r1 + " ] = " + stages[4].valueR1);
+        }
+        System.out.println("\n-----------------------------------------------------------------------\n");
     }
 
     private void shiftStages(int cycles) {
@@ -248,12 +371,14 @@ public class Computer {
         System.out.println("Memory content:");
         System.out.println("Memory Instructions Part:");
         int i = 0;
-        while (i <= 1023) {
-            System.out.println("Memory Instruction Cell" + (++i) + " -> " + memory[i]);
+        while (i < 1023) {
+            System.out.println("Memory Instruction Cell" + (1+i) + " -> " + memory[i]);
+            i++;
         }
         System.out.println("\nMemory Data Part:");
-        while (i <= 2048) {
-            System.out.println("Memory Data Cell" + (++i) + " -> " + memory[i]);
+        while (i < 2048) {
+            System.out.println("Memory Data Cell" + (1+i) + " -> " + memory[i]);
+            i++;
         }
         System.out.println("\n-----------------------------------------------------------------------\n");
 
@@ -270,6 +395,8 @@ public class Computer {
 
     public static void main(String[] args) {
         Computer c = new Computer();
+        c.registers[1] = 3;
+        c.registers[2] = 5;
         c.run("program.txt");
 
     }
