@@ -117,7 +117,7 @@ public class Parser {
             binaryInstruction += firstNBits(address, 28);
         }
 
-        return Integer.parseInt(binaryInstruction, 2);
+        return Instruction.parseSignedInteger(binaryInstruction);
     }
 
 

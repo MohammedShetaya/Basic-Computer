@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Computer {
@@ -46,10 +48,7 @@ public class Computer {
         if (stages[2] == null)
             return;
         Instruction i = stages[2];
-        stages[2].execute(pc);
-         if(i.jumpFlag){
-            pc = i.aluResult;
-        }
+        stages[2].execute(pc, registers);
 
     }
 
@@ -87,6 +86,7 @@ public class Computer {
                 break;
 
         }
+
     }
 
 
@@ -103,6 +103,8 @@ public class Computer {
         int curMemoryAddress = 0;
         while (myReader.hasNextLine()) {
             String instruction = myReader.nextLine();
+            if(instruction.trim().length()<1)
+                continue;
             int word = parser.convertAssemblyToBinary(instruction);
             memory[curMemoryAddress++] = word;
         }
@@ -112,19 +114,24 @@ public class Computer {
             if (cycles % 2 == 1) {
 
                 stages[0] = null;
-                fetch();
-                execute();
                 writeBack();
+                execute();
+                fetch();
 
             } else {
-                decode();
                 memoryAccess();
+                decode();
+
             }
 
             // printings
             System.out.println("cycle number: " + cycles);
             // print changes in registers and memory
             printStages();
+            printChangeInMemory();
+            printChangedRegisters();
+            System.out.println("\n-----------------------------------------------------------------------\n");
+
 
             // prepare stages for next cycle
             checkJump();
@@ -132,10 +139,13 @@ public class Computer {
             cycles++;
         }
 
-        printAllRegisters();
-        printAllMemory();
+//        printAllRegisters();
+//        printAllMemory();
 
     }
+
+
+
 
     private boolean checkJump() {
         // If a jump instruction has finished the memory stage,
@@ -144,6 +154,8 @@ public class Computer {
             return false;
 
         if(stages[3].jumpFlag){
+            System.out.println("A jump happened and the instructions at the Decode and Execute stages will be dropped\n");
+            pc = stages[3].aluResult;
             stages[0] = null;
             stages[1]= null;
             stages[2] = null;
@@ -152,6 +164,26 @@ public class Computer {
         return false;
 
     }
+    private void printChangeInMemory() {
+        if(stages[3] == null)
+            return;
+        Instruction curInstruction = stages[3];
+        if(curInstruction.opcode == 11){
+            System.out.println("\n***** Memory word at index "+curInstruction.aluResult+" was set to "+curInstruction.valueR1+" *****");
+        }
+    }
+    private void printChangedRegisters() {
+        List<Integer> changeArr = List.of(0,1,2,3,5,6,8,9,10);
+        if (stages[4] == null || !changeArr.contains(stages[4].opcode))
+            return;
+        Instruction curInstruction = stages[4];
+        // R0 cannot be overwritten
+        if(curInstruction.r1 == 0)
+            System.out.println("\n***** R0 Cannot be overwritten *****");
+        else
+            System.out.println("\n***** R"+curInstruction.r1+" was set to "+registers[curInstruction.r1]+" *****");
+    }
+
 
     public void printStages () {
         if (stages[0] == null)
@@ -161,7 +193,7 @@ public class Computer {
             System.out.println("Inputs : ");
             System.out.println("PC = " + (pc-1));
             System.out.println("Outputs : ");
-            System.out.println("BinaryInstruction = " + stages[0].binInstruction);
+            System.out.println("BinaryInstruction = " + Instruction.numberTobinaryString(stages[0].binInstruction));
         }
         System.out.println("\n----------------------------\n");
         if (stages[1] == null)
@@ -169,7 +201,7 @@ public class Computer {
         else {
             System.out.println("Decoding : " + stages[1].stringInstruction);
             System.out.println("Inputs : ");
-            System.out.println("BinaryInstruction = " + stages[1].binInstruction);
+            System.out.println("BinaryInstruction = " + Instruction.numberTobinaryString(stages[1].binInstruction));
             System.out.println("Outputs : ");
             System.out.println("opcode = " + stages[1].opcode);
             System.out.println("R1 = " + stages[1].r1);
@@ -229,7 +261,7 @@ public class Computer {
                 case 6 :
                     System.out.println("Inputs : ");
                     System.out.println("Registers[ " + stages[2].r2 + " ] = " + stages[2].valueR2);
-                    System.out.println("Registers[ " + stages[2].r3 + " ] = " + stages[2].valueR3);
+                    System.out.println("imm = " + stages[2].imm);
                     System.out.println("Outputs : ");
                     System.out.println("ALU Result = " + stages[2].aluResult);
                     break;
@@ -308,9 +340,11 @@ public class Computer {
             System.out.println("Inputs : ");
             System.out.println("No inputs needed");
             System.out.println("Outputs : ");
-            System.out.println("Registers[ " + stages[4].r1 + " ] = " + stages[4].valueR1);
+            if(List.of(0,1,2,3,5,6,8,9,10).contains(stages[4].opcode))
+                System.out.println("Registers[ " + stages[4].r1 + " ] = " + stages[4].valueR1);
+            else
+                System.out.println("No write back");
         }
-        System.out.println("\n-----------------------------------------------------------------------\n");
     }
 
     private void shiftStages(int cycles) {
@@ -378,11 +412,25 @@ public class Computer {
         return true;
     }
 
+    public static String center(String s, int size, char pad) {
+        if (s == null || size <= s.length())
+            return s;
+
+        StringBuilder sb = new StringBuilder(size);
+        for (int i = 0; i < (size - s.length()) / 2; i++) {
+            sb.append(pad);
+        }
+        sb.append(s);
+        while (sb.length() < size) {
+            sb.append(pad);
+        }
+        return sb.toString();
+    }
 
     public static void main(String[] args) {
         Computer c = new Computer();
-        c.registers[1] = 3;
-        c.registers[2] = 5;
+//        c.registers[2] = 3;
+//        c.registers[3] = -1;
         c.run("program.txt");
 
     }

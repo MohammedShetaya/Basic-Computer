@@ -58,7 +58,10 @@ public class Instruction {
         stringInstruction = convertBinaryToAssembly(binInstruction);
     }
 
-    public void execute(int pc){
+    public void execute(int pc, int[] registerFile){
+        valueR1 = registerFile[r1];
+        valueR2 = registerFile[r2];
+        valueR3 = registerFile[r3];
         switch (opcode){
             //add: R1 = R2 + R3
             case 0: aluResult = valueR2 + valueR3; break;
@@ -72,7 +75,7 @@ public class Instruction {
             // jump to  PC+1+IMM no registers needed
             // pc is already pointing to next instruction,add imm to it
             case 4 : if( valueR1 == valueR2 ){
-                aluResult= pc+imm;
+                aluResult= pc+imm - 1;
                 jumpFlag = true;
             }
             else aluResult = pc ;break ;
@@ -111,7 +114,7 @@ public class Instruction {
         int shamt = Integer.parseInt(inst.substring(19, 32), 2);
 
         // Immediate
-        int imm = Integer.parseInt(inst.substring(14, 32), 2);
+        int imm = parseSignedInteger(inst.substring(14, 32));
 
         // Jtype
         int address = Integer.parseInt(inst.substring(4, 32), 2);
@@ -138,9 +141,9 @@ public class Instruction {
             // logical shift right: R1 = R2>>>shamt
             case 9: return ("LSR " + "R" + r1 + " R" + r2 + " " + shamt);
             // MOVR = R1= MEM[R2+IMM]
-            case 10: return("MOVR" + "R" + r1 + " R" + r2 + " " + imm);
+            case 10: return("MOVR" + "R" + r1 + " R" + r2 + " " + Math.abs(imm));
             //MOVM = MEM[R2+IMM]=R1
-            case 11: return("MOVM " + "R" + r1 + " R" + r2 + " " + imm);
+            case 11: return("MOVM " + "R" + r1 + " R" + r2 + " " + Math.abs(imm));
             default: return "";
         }
     }
