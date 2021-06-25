@@ -342,16 +342,30 @@ public class Computer {
     private void printAllMemory() {
         System.out.println("Memory content:");
         System.out.println("Memory Instructions Part:");
-        int i = 0;
-        while (i < 1023) {
-            System.out.println("Memory Instruction Cell" + (1+i) + " -> " + memory[i]);
+        int i = 0 ;
+        System.out.println("-------------------------") ;
+         while (i < 1023) {
+
+            System.out.println("|"+ center(i+"" ,11,' ')+"|" + center(memory[i]+"" ,11,' ')+"|");
+            if (i!=1023)
+            System.out.println("-------------------------") ;
+
             i++;
         }
-        System.out.println("\nMemory Data Part:");
+        System.out.println("-------------------------") ;
+        System.out.println();
+        System.out.println("Memory Data Part:");
         while (i < 2048) {
-            System.out.println("Memory Data Cell" + (1+i) + " -> " + memory[i]);
+            System.out.println("|"+ center(i+"" ,11,' ')+"|" + center(memory[i]+"" ,11,' ')+"|");
+             if (i!=1023)
+            System.out.println("-------------------------") ;
+
             i++;
         }
+
+//        System.out.println("-----------------------") ;
+
+
         System.out.println("\n-----------------------------------------------------------------------\n");
 
     }
@@ -372,6 +386,7 @@ public class Computer {
         c.run("program.txt");
 
     }
+
 
 
 }
