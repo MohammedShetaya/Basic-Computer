@@ -88,9 +88,9 @@ public class Instruction {
             // logical shift right: R1 = R2>>>shamt
             case 9: aluResult=  valueR2>>>shamt; break;
             // MOVR = R1= MEM[R2+IMM]
-            case 10: aluResult = valueR2 + Math.abs(imm); break;
+            case 10: aluResult = valueR2 + imm; break;
             //MOVM = MEM[R2+IMM]=R1
-            case 11: aluResult = valueR2 + Math.abs(imm); break;
+            case 11: aluResult = valueR2 + imm; break;
         }
     }
     public void memoryAccess(int[] memory) {
@@ -139,9 +139,9 @@ public class Instruction {
             // logical shift right: R1 = R2>>>shamt
             case 9: return ("LSR " + "R" + r1 + " R" + r2 + " " + shamt);
             // MOVR = R1= MEM[R2+IMM]
-            case 10: return("MOVR" + "R" + r1 + " R" + r2 + " " + Math.abs(imm));
+            case 10: return("MOVR" + "R" + r1 + " R" + r2 + " " + imm);
             //MOVM = MEM[R2+IMM]=R1
-            case 11: return("MOVM " + "R" + r1 + " R" + r2 + " " + Math.abs(imm));
+            case 11: return("MOVM " + "R" + r1 + " R" + r2 + " " + imm);
             default: return "";
         }
     }
