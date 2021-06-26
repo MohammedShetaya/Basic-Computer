@@ -6,12 +6,7 @@ import java.util.Scanner;
 
 public class Computer {
     private Parser parser;
-    final int instStart = 0;
-    final int instEnd = 1023;
-    final int dataStart = 1024;
-    final int dataEnd = 2047;
     final int memSize = 2048;
-    int dataSize;
     int instructionSize;
     Instruction stages[];
     int memory[];
@@ -25,7 +20,6 @@ public class Computer {
         registers = new int[32];
         stages = new Instruction[5];
         pc = 0;
-        dataSize = 0;
         instructionSize = 0;
     }
 
@@ -112,16 +106,12 @@ public class Computer {
         cycles = 1;
         while (pc < instructionSize || !allNull()) {
             if (cycles % 2 == 1) {
-
-                stages[0] = null;
                 writeBack();
                 execute();
                 fetch();
-
             } else {
                 memoryAccess();
                 decode();
-
             }
 
             // printings
@@ -132,15 +122,14 @@ public class Computer {
             printChangedRegisters();
             System.out.println("\n-----------------------------------------------------------------------\n");
 
-
             // prepare stages for next cycle
             checkJump();
             shiftStages(cycles);
             cycles++;
         }
 
-//        printAllRegisters();
-//        printAllMemory();
+        printAllRegisters();
+        printAllMemory();
 
     }
 

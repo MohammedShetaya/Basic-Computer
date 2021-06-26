@@ -25,9 +25,7 @@ public class Instruction {
 
     }
     public void fetch(int binInstruction){
-
         this.binInstruction = binInstruction;
-        this.stringInstruction = convertBinaryToAssembly(binInstruction);
     }
 
     public void decode(int[] registerFile){
@@ -155,8 +153,10 @@ public class Instruction {
             sb.append(n & 1);
             n >>=1;
         }
-        // 1101
-        // 0001
+        // 13
+        // "00000000000000000000000000"
+        // 6
+        // 101100000
         return sb.reverse().toString();
     }
 
